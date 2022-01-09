@@ -6,21 +6,28 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+
+	"github.com/apaarshrm39/Go-Resume/pkg/config"
+	"github.com/apaarshrm39/Go-Resume/pkg/models"
 )
 
 var functions = template.FuncMap{}
 
-func Render(w http.ResponseWriter, tmpl string) {
-	/*
-		t, err := template.New("home.page.html").ParseFiles("./templates/" + tmpl)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-	*/
-	//buf := new(bytes.Buffer)
-	templates := TemplateCache()
-	templates[tmpl].Execute(w, nil)
+var appSettings *config.Appconfig
+
+func SetAppsettings(a *config.Appconfig) {
+	appSettings = a
+}
+
+func Render(w http.ResponseWriter, tmpl string, tdata *models.TemplateData) {
+
+	templates := make(map[string]*template.Template)
+	if appSettings.EnableCache {
+		templates = appSettings.Templates
+	} else {
+		templates = TemplateCache()
+	}
+	templates[tmpl].Execute(w, tdata)
 }
 
 func TemplateCache() map[string]*template.Template {
